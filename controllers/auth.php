@@ -1,0 +1,1 @@
+<?php // autenticación/login/logout ?>

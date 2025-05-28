@@ -1,0 +1,8 @@
+/uploads/fotos/
+*.log
+*.sql
+*.zip
+/vendor/
+/.env
+.DS_Store
+Thumbs.db
