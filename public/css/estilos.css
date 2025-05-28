@@ -65,4 +65,57 @@ form button:hover {
     text-decoration: none;
     font-size: 0.9em;
 }
+.dashboard-container {
+    max-width: 800px;
+    margin: 40px auto;
+    background-color: #ffffff;
+    padding: 30px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.dashboard-container h2 {
+    text-align: center;
+    color: #003366;
+    margin-bottom: 10px;
+}
+
+.dashboard-container p {
+    text-align: center;
+    font-size: 1.1em;
+    color: #333;
+}
+
+.dashboard-menu {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+.dashboard-menu li {
+    background-color: #003366;
+    color: white;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.dashboard-menu li a {
+    color: white;
+    text-decoration: none;
+    display: block;
+}
+
+.dashboard-menu li:hover {
+    background-color: #002244;
+}
+
+.logout-btn {
+    color: #cc0000;
+    text-align: center;
+    display: block;
+    margin-top: 30px;
+}
+
 
