@@ -10,18 +10,25 @@ require_once '../config/db.php';
 
 $mensaje = "";
 
+// Obtener lista de funcionarios
+$funcionarios = [];
+$query = $conn->query("SELECT id_funcionario, nombre FROM funcionario ORDER BY nombre ASC");
+while ($row = $query->fetch_assoc()) {
+    $funcionarios[] = $row;
+}
+
 // Procesar salida
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $placa = strtoupper(trim($_POST['placa']));
     $observaciones = trim($_POST['observaciones']);
     $parqueadero = $_POST['parqueadero'];
     $sede = $_POST['sede'];
+    $id_funcionario = $_POST['id_funcionario'];
     $fecha = date('Y-m-d');
     $hora = date('H:i:s');
     $tipo_registro = "Salida";
     $registrado_por = $_SESSION['id_usuario'];
 
-    // Verificar último registro de ingreso
     $sqlCheck = "SELECT * FROM ingresosalida 
                  WHERE id_vehiculo = ? 
                  ORDER BY id_registro DESC LIMIT 1";
@@ -35,12 +42,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $ultimo = $res->fetch_assoc();
 
         if ($ultimo['tipo_registro'] === 'Ingreso') {
-            // Registrar salida
             $stmt = $conn->prepare("INSERT INTO ingresosalida 
-                (id_vehiculo, id_usuario, tipo_registro, fecha, hora, parqueadero, observaciones, sede, registrado_por) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                (id_vehiculo, id_usuario, tipo_registro, fecha, hora, parqueadero, observaciones, sede, registrado_por, id_funcionario) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-            $stmt->bind_param("sissssssi", $placa, $registrado_por, $tipo_registro, $fecha, $hora, $parqueadero, $observaciones, $sede, $registrado_por);
+            $stmt->bind_param("sisssssssi", $placa, $registrado_por, $tipo_registro, $fecha, $hora, $parqueadero, $observaciones, $sede, $registrado_por, $id_funcionario);
 
             if ($stmt->execute()) {
                 $mensaje = "✅ Salida registrada correctamente.";
@@ -69,6 +75,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label>Placa del vehículo:</label>
         <input type="text" name="placa" required><br>
 
+        <label>Funcionario que retira el vehículo:</label>
+        <select name="id_funcionario" required>
+            <option value="">Seleccionar funcionario</option>
+            <?php foreach ($funcionarios as $f): ?>
+                <option value="<?= $f['id_funcionario'] ?>"><?= $f['nombre'] ?></option>
+            <?php endforeach; ?>
+        </select><br>
+
         <label>Observaciones:</label>
         <textarea name="observaciones" rows="3"></textarea><br>
 
@@ -91,4 +105,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>
 
 <?php require_once '../includes/footer.php'; ?>
-

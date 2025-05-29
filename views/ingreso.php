@@ -10,6 +10,13 @@ require_once '../config/db.php';
 
 $mensaje = "";
 
+// Obtener lista de funcionarios
+$funcionarios = [];
+$query = $conn->query("SELECT id_funcionario, nombre FROM funcionario ORDER BY nombre ASC");
+while ($row = $query->fetch_assoc()) {
+    $funcionarios[] = $row;
+}
+
 // Procesar el formulario
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $placa = strtoupper(trim($_POST['placa']));
@@ -17,25 +24,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $observaciones = trim($_POST['observaciones']);
     $parqueadero = $_POST['parqueadero'];
     $sede = $_POST['sede'];
+    $id_funcionario = $_POST['id_funcionario'];
     $fecha = date('Y-m-d');
     $hora = date('H:i:s');
     $tipo_registro = "Ingreso";
     $registrado_por = $_SESSION['id_usuario'];
 
-    // Verificar si el vehículo existe
     $verifica = $conn->prepare("SELECT placa FROM vehiculo WHERE placa = ?");
     $verifica->bind_param("s", $placa);
     $verifica->execute();
     $res = $verifica->get_result();
 
-    // Si no existe, lo insertamos con datos mínimos
     if ($res->num_rows == 0) {
         $insert_vehiculo = $conn->prepare("INSERT INTO vehiculo (placa, tipo) VALUES (?, ?)");
         $insert_vehiculo->bind_param("ss", $placa, $tipo_vehiculo);
         $insert_vehiculo->execute();
     }
 
-    // Subir foto
     $foto_nombre = "";
     if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
         $foto_tmp = $_FILES['foto']['tmp_name'];
@@ -43,13 +48,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         move_uploaded_file($foto_tmp, "../uploads/fotos/" . $foto_nombre);
     }
 
-    // Insertar en ingresosalida
     $sql = "INSERT INTO ingresosalida 
-            (id_vehiculo, id_usuario, tipo_registro, fecha, hora, parqueadero, observaciones, foto, sede, registrado_por)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            (id_vehiculo, id_usuario, tipo_registro, fecha, hora, parqueadero, observaciones, foto, sede, registrado_por, id_funcionario)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sisssssssi", $placa, $registrado_por, $tipo_registro, $fecha, $hora, $parqueadero, $observaciones, $foto_nombre, $sede, $registrado_por);
+    $stmt->bind_param("sissssssssi", $placa, $registrado_por, $tipo_registro, $fecha, $hora, $parqueadero, $observaciones, $foto_nombre, $sede, $registrado_por, $id_funcionario);
 
     if ($stmt->execute()) {
         $mensaje = "✅ Ingreso registrado correctamente.";
@@ -77,6 +81,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <option value="Moto">Moto</option>
             <option value="Camioneta">Camioneta</option>
             <option value="Otro">Otro</option>
+        </select><br>
+
+        <label>Funcionario que entrega el vehículo:</label>
+        <select name="id_funcionario" required>
+            <option value="">Seleccionar funcionario</option>
+            <?php foreach ($funcionarios as $f): ?>
+                <option value="<?= $f['id_funcionario'] ?>"><?= $f['nombre'] ?></option>
+            <?php endforeach; ?>
         </select><br>
 
         <label>Observaciones:</label>

@@ -48,9 +48,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <button type="submit">Ingresar</button>
 </form>
 
-<div class="actions">
-    <a href="recover.php">¿Olvidaste tu contraseña?</a> |
-    <a href="register.php">Solicitar acceso</a>
+<div class="login-links">
+    <a class="btn-link" href="recuperar.php">¿Olvidaste tu contraseña?</a>
+    <a class="btn-link" href="views/solicitar_acceso.php">Solicitar acceso</a>
 </div>
+
 
 <?php require_once 'includes/footer.php'; ?>
