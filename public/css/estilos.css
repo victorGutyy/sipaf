@@ -5,21 +5,40 @@ body {
     padding: 0;
 }
 
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: #003366;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    z-index: 1000;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #003366;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    z-index: 1000;
+}
+
+.main-content {
+    padding-top: 160px; /* Espacio debajo del header fijo */
+    padding-bottom: 100px; /* Espacio arriba del footer fijo */
+}
+
 .container {
-    max-width: 500px;
-    margin: 50px auto;
+    max-width: 900px;
+    margin: 0 auto;
     background-color: #fff;
     border: 1px solid #ccc;
     border-radius: 8px;
-    padding: 30px;
-}
-
-header, footer {
-    text-align: center;
-    padding: 10px;
-    background-color: #003366;
-    color: white;
-    border-radius: 8px 8px 0 0;
+    padding: 20px;
 }
 
 h1 {
@@ -255,4 +274,99 @@ form button:hover,
 .btn-link:hover {
     background-color: #002244;
 }
+
+/* Hacer imágenes como el logo adaptables */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Que el texto no se salga en pantallas pequeñas */
+body, h1, h2, h3, p, label, input, select, button, textarea {
+    word-wrap: break-word;
+}
+
+/* Ajustes para tablas en móviles */
+.tabla-funcionarios {
+    overflow-x: auto;
+    display: block;
+}
+
+/* Media Queries para pantallas pequeñas */
+@media (max-width: 768px) {
+    .container,
+    .dashboard-container,
+    .crud-container {
+        width: 95%;
+        padding: 15px;
+    }
+
+    header h1, header h2 {
+        font-size: 1.2em;
+    }
+
+    .dashboard-menu li {
+        font-size: 0.95em;
+        padding: 10px;
+    }
+
+    .btn, .btn-edit, .btn-delete, .btn-back, .btn-logout, .dashboard-btn {
+        width: 100%;
+        font-size: 14px;
+        padding: 10px;
+        margin: 6px 0;
+    }
+
+    footer p {
+        font-size: 12px;
+    }
+
+    .main-content {
+        padding-top: 180px;  /* más espacio si el header crece en altura */
+        padding-bottom: 120px;
+    }
+}
+
+/* Estilo específico para formulario de login */
+.login-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-container input[type="text"],
+.login-container input[type="password"] {
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fffde7;
+}
+
+.login-container button {
+    width: 100%;
+    padding: 10px;
+    background-color: #cc0000;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.login-container button:hover {
+    background-color: #990000;
+}
+
+.login-links {
+    text-align: center;
+    margin-top: 15px;
+}
+
+
 

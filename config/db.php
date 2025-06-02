@@ -1,6 +1,8 @@
 <?php
 // config/db.php
 
+date_default_timezone_set('America/Bogota');
+
 $host = "localhost";
 $user = "root";
 $pass = "";

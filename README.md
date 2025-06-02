@@ -111,3 +111,5 @@ RNF10	El sistema deberá estar preparado para operar bajo una conexión a intern
 
 MODELO ENTIDAD RELACION 
 
+
+

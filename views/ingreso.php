@@ -30,6 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $tipo_registro = "Ingreso";
     $registrado_por = $_SESSION['id_usuario'];
 
+    // Verificar si el vehículo ya existe
     $verifica = $conn->prepare("SELECT placa FROM vehiculo WHERE placa = ?");
     $verifica->bind_param("s", $placa);
     $verifica->execute();
@@ -41,6 +42,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $insert_vehiculo->execute();
     }
 
+    // Verificar si el último registro fue un ingreso sin salida
+    $check = $conn->prepare("
+        SELECT tipo_registro 
+        FROM ingresosalida 
+        WHERE id_vehiculo = ? 
+        ORDER BY id_registro DESC 
+        LIMIT 1
+    ");
+    $check->bind_param("s", $placa);
+    $check->execute();
+    $result = $check->get_result();
+
+    $permitido = false;
+    if ($result->num_rows > 0) {
+        $ultimo = $result->fetch_assoc();
+        if ($ultimo['tipo_registro'] === 'Salida') {
+            $permitido = true;
+        } else {
+            $mensaje = "❌ El vehículo ya está registrado como ingresado. Debe registrarse la salida antes.";
+        }
+    } else {
+        $permitido = true; // No hay registros previos, se permite el ingreso.
+    }
+
+    // Cargar foto si aplica
     $foto_nombre = "";
     if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
         $foto_tmp = $_FILES['foto']['tmp_name'];
@@ -48,17 +74,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         move_uploaded_file($foto_tmp, "../uploads/fotos/" . $foto_nombre);
     }
 
-    $sql = "INSERT INTO ingresosalida 
+    // Registrar ingreso si está permitido
+    if ($permitido) {
+        $stmt = $conn->prepare("INSERT INTO ingresosalida 
             (id_vehiculo, id_usuario, tipo_registro, fecha, hora, parqueadero, observaciones, foto, sede, registrado_por, id_funcionario)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sissssssssi", $placa, $registrado_por, $tipo_registro, $fecha, $hora, $parqueadero, $observaciones, $foto_nombre, $sede, $registrado_por, $id_funcionario);
+        $stmt->bind_param("sissssssssi", $placa, $registrado_por, $tipo_registro, $fecha, $hora, $parqueadero, $observaciones, $foto_nombre, $sede, $registrado_por, $id_funcionario);
 
-    if ($stmt->execute()) {
-        $mensaje = "✅ Ingreso registrado correctamente.";
-    } else {
-        $mensaje = "❌ Error al registrar el ingreso: " . $stmt->error;
+        if ($stmt->execute()) {
+            $mensaje = "✅ Ingreso registrado correctamente.";
+        } else {
+            $mensaje = "❌ Error al registrar el ingreso: " . $stmt->error;
+        }
     }
 }
 ?>

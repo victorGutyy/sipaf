@@ -28,8 +28,7 @@ $rol = $_SESSION['rol'];
             <?php elseif ($rol === 'Guarda'): ?>
                 <li><a class="btn-dashboard" href="ingreso.php"> Registrar ingreso de vehículo</a></li>
                 <li><a class="btn-dashboard" href="salida.php"> Registrar salida de vehículo</a></li>
-                <li><a class="btn-dashboard" href="reportes.php"> Ver historial</a></li>
-
+    
             <?php elseif ($rol === 'Funcionario'): ?>
                 <li><a class="btn-dashboard" href="#">📊 Ver estado de parqueaderos</a></li>
                 <li><a class="btn-dashboard" href="#">📄 Mis reportes</a></li>
@@ -39,7 +38,7 @@ $rol = $_SESSION['rol'];
             <?php endif; ?>
 
             <?php if ($rol === 'Administrador' || $rol === 'Guarda'): ?>
-                <li><a class="btn-dashboard" href="historial_movimientos.php">📄 Historial vehicular</a></li>
+                <li><a class="btn-dashboard" href="historial_movimientos.php"> Historial vehicular</a></li>
             <?php endif; ?>
         </ul>
     </div>

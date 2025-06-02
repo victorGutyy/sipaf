@@ -29,19 +29,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $tipo_registro = "Salida";
     $registrado_por = $_SESSION['id_usuario'];
 
-    $sqlCheck = "SELECT * FROM ingresosalida 
-                 WHERE id_vehiculo = ? 
-                 ORDER BY id_registro DESC LIMIT 1";
+    // Verificar el último registro del vehículo
+    $verifica = $conn->prepare("
+        SELECT tipo_registro 
+        FROM ingresosalida 
+        WHERE id_vehiculo = ? 
+        ORDER BY id_registro DESC 
+        LIMIT 1
+    ");
+    $verifica->bind_param("s", $placa);
+    $verifica->execute();
+    $resultado = $verifica->get_result();
 
-    $stmtCheck = $conn->prepare($sqlCheck);
-    $stmtCheck->bind_param("s", $placa);
-    $stmtCheck->execute();
-    $res = $stmtCheck->get_result();
-
-    if ($res->num_rows > 0) {
-        $ultimo = $res->fetch_assoc();
+    if ($resultado->num_rows > 0) {
+        $ultimo = $resultado->fetch_assoc();
 
         if ($ultimo['tipo_registro'] === 'Ingreso') {
+            // Insertar salida
             $stmt = $conn->prepare("INSERT INTO ingresosalida 
                 (id_vehiculo, id_usuario, tipo_registro, fecha, hora, parqueadero, observaciones, sede, registrado_por, id_funcionario) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -51,11 +55,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($stmt->execute()) {
                 $mensaje = "✅ Salida registrada correctamente.";
             } else {
-                $mensaje = "❌ Error al registrar la salida.";
+                $mensaje = "❌ Error al registrar la salida: " . $stmt->error;
             }
 
         } else {
-            $mensaje = "⚠️ El vehículo ya se encuentra fuera.";
+            $mensaje = "⚠️ El vehículo ya se encuentra fuera. No es posible registrar otra salida.";
         }
 
     } else {

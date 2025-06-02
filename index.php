@@ -38,6 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <p style="color:red;"><?php echo $error; ?></p>
 <?php endif; ?>
 
+<div class="login-container">
 <form method="post">
     <label for="documento">Documento:</label>
     <input type="text" name="documento" required>
@@ -48,9 +49,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <button type="submit">Ingresar</button>
 </form>
 
-<div class="login-links">
-    <a class="btn-link" href="recuperar.php">¿Olvidaste tu contraseña?</a>
-    <a class="btn-link" href="views/solicitar_acceso.php">Solicitar acceso</a>
+    <div class="login-links">
+        <a class="btn-link" href="recuperar.php">¿Olvidaste tu contraseña?</a>
+        <a class="btn-link" href="views/solicitar_acceso.php">Solicitar acceso</a>
+    </div>
 </div>
 
 
