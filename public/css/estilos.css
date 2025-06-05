@@ -135,16 +135,18 @@ form button:hover,
 
 .dashboard-btn {
     display: block;
-    width: 100%;
-    margin: 10px 0;
-    padding: 12px;
+    margin: 10px auto; /* Centrado */
+    width: 300px;       /* Tamaño uniforme */
+    height: 45px;       /* Altura más reducida */
     background-color: #003366;
     color: white;
     text-align: center;
     border-radius: 6px;
     text-decoration: none;
     font-weight: bold;
-    transition: 0.3s;
+    font-size: 15px;
+    transition: background-color 0.3s ease;
+    line-height: 45px; /* Centrado vertical del texto */
 }
 
 .dashboard-btn:hover {
@@ -240,14 +242,18 @@ form button:hover,
 }
 
 .btn-logout {
+    display: block;
+    margin: 30px auto 0;
+    width: 300px;
+    height: 45px;
     background-color: #cc0000;
     color: white;
-    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: bold;
     border: none;
     border-radius: 6px;
-    font-size: 16px;
-    font-weight: bold;
     cursor: pointer;
+    line-height: 45px;
     transition: background-color 0.3s ease;
 }
 .btn-logout:hover {
@@ -296,9 +302,12 @@ body, h1, h2, h3, p, label, input, select, button, textarea {
 @media (max-width: 768px) {
     .container,
     .dashboard-container,
+    .dashboard-btn,
+    .btn-logout,
     .crud-container {
         width: 95%;
         padding: 15px;
+        font-size: 14px;
     }
 
     header h1, header h2 {
@@ -366,6 +375,35 @@ body, h1, h2, h3, p, label, input, select, button, textarea {
 .login-links {
     text-align: center;
     margin-top: 15px;
+}
+
+.btn {
+    padding: 8px 15px;
+    border: none;
+    background-color: #0066cc;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn:hover {
+    background-color: #004a99;
+}
+
+.tabla-funcionarios {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla-funcionarios th, .tabla-funcionarios td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+}
+
+.dashboard-container h2, h3 {
+    text-align: center;
 }
 
 

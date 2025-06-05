@@ -99,6 +99,9 @@ $resultado = $conn->query($sql);
     </table>
 
     <a class="btn btn-back" href="dashboard.php">⬅ Volver al panel</a>
+    <div style="text-align: center; margin: 20px 0;">
+    <a href="estadisticas_parqueaderos.php" class="btn btn-estadistica">📊 Ver estadísticas</a>
+    </div>
 </div>
 
 <?php require_once '../includes/footer.php'; ?>
