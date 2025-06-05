@@ -32,12 +32,13 @@ $sql = "
         f.nombre AS conductor,
         u.nombre AS registrado_por
     FROM ingresosalida i
-    INNER JOIN vehiculo v ON i.id_vehiculo = v.placa
-    INNER JOIN funcionario f ON i.id_funcionario = f.id_funcionario
-    INNER JOIN usuario u ON i.registrado_por = u.id_usuario
+    LEFT JOIN vehiculo v ON i.id_vehiculo = v.id_vehiculo
+    LEFT JOIN funcionario f ON i.id_funcionario = f.id_funcionario
+    LEFT JOIN usuario u ON i.registrado_por = u.id_usuario
     $where_sql
     ORDER BY i.id_registro DESC
 ";
+
 
 $resultado = $conn->query($sql);
 ?>

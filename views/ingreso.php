@@ -30,43 +30,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $tipo_registro = "Ingreso";
     $registrado_por = $_SESSION['id_usuario'];
 
-    // Verificar si el vehículo ya existe
-    $verifica = $conn->prepare("SELECT placa FROM vehiculo WHERE placa = ?");
-    $verifica->bind_param("s", $placa);
-    $verifica->execute();
-    $res = $verifica->get_result();
+    // Buscar si el vehículo existe y obtener su ID
+    $stmtVehiculo = $conn->prepare("SELECT id_vehiculo FROM vehiculo WHERE placa = ?");
+    $stmtVehiculo->bind_param("s", $placa);
+    $stmtVehiculo->execute();
+    $resVehiculo = $stmtVehiculo->get_result();
 
-    if ($res->num_rows == 0) {
-        $insert_vehiculo = $conn->prepare("INSERT INTO vehiculo (placa, tipo) VALUES (?, ?)");
-        $insert_vehiculo->bind_param("ss", $placa, $tipo_vehiculo);
-        $insert_vehiculo->execute();
-    }
-
-    // Verificar si el último registro fue un ingreso sin salida
-    $check = $conn->prepare("
-        SELECT tipo_registro 
-        FROM ingresosalida 
-        WHERE id_vehiculo = ? 
-        ORDER BY id_registro DESC 
-        LIMIT 1
-    ");
-    $check->bind_param("s", $placa);
-    $check->execute();
-    $result = $check->get_result();
-
-    $permitido = false;
-    if ($result->num_rows > 0) {
-        $ultimo = $result->fetch_assoc();
-        if ($ultimo['tipo_registro'] === 'Salida') {
-            $permitido = true;
-        } else {
-            $mensaje = "❌ El vehículo ya está registrado como ingresado. Debe registrarse la salida antes.";
-        }
+    if ($resVehiculo->num_rows > 0) {
+        $vehiculo = $resVehiculo->fetch_assoc();
+        $idVehiculo = $vehiculo['id_vehiculo'];
     } else {
-        $permitido = true; // No hay registros previos, se permite el ingreso.
+        // Insertar vehículo si no existe
+        $insertVehiculo = $conn->prepare("INSERT INTO vehiculo (placa, tipo) VALUES (?, ?)");
+        $insertVehiculo->bind_param("ss", $placa, $tipo_vehiculo);
+        if ($insertVehiculo->execute()) {
+            $idVehiculo = $insertVehiculo->insert_id;
+        } else {
+            $mensaje = "❌ Error al registrar el vehículo.";
+            $idVehiculo = null;
+        }
     }
 
-    // Cargar foto si aplica
+    // Verificar si se permite el ingreso
+    $permitido = false;
+    if ($idVehiculo !== null) {
+        $check = $conn->prepare("
+            SELECT tipo_registro 
+            FROM ingresosalida 
+            WHERE id_vehiculo = ? 
+            ORDER BY id_registro DESC 
+            LIMIT 1
+        ");
+        $check->bind_param("i", $idVehiculo);
+        $check->execute();
+        $result = $check->get_result();
+
+        if ($result->num_rows > 0) {
+            $ultimo = $result->fetch_assoc();
+            if ($ultimo['tipo_registro'] === 'Salida') {
+                $permitido = true;
+            } else {
+                $mensaje = "❌ El vehículo ya está registrado como ingresado. Debe registrarse la salida antes.";
+            }
+        } else {
+            $permitido = true;
+        }
+    }
+
+    // Procesar imagen
     $foto_nombre = "";
     if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
         $foto_tmp = $_FILES['foto']['tmp_name'];
@@ -74,13 +85,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         move_uploaded_file($foto_tmp, "../uploads/fotos/" . $foto_nombre);
     }
 
-    // Registrar ingreso si está permitido
-    if ($permitido) {
+    // Registrar ingreso si se permite
+    if ($permitido && $idVehiculo !== null) {
         $stmt = $conn->prepare("INSERT INTO ingresosalida 
             (id_vehiculo, id_usuario, tipo_registro, fecha, hora, parqueadero, observaciones, foto, sede, registrado_por, id_funcionario)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-        $stmt->bind_param("sissssssssi", $placa, $registrado_por, $tipo_registro, $fecha, $hora, $parqueadero, $observaciones, $foto_nombre, $sede, $registrado_por, $id_funcionario);
+        $stmt->bind_param("iissssssssi", $idVehiculo, $registrado_por, $tipo_registro, $fecha, $hora, $parqueadero, $observaciones, $foto_nombre, $sede, $registrado_por, $id_funcionario);
 
         if ($stmt->execute()) {
             $mensaje = "✅ Ingreso registrado correctamente.";
@@ -90,6 +101,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
+
+<!-- HTML -->
 
 <div class="dashboard-container">
     <h2>Registrar ingreso de vehículo</h2>

@@ -29,41 +29,53 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $tipo_registro = "Salida";
     $registrado_por = $_SESSION['id_usuario'];
 
-    // Verificar el último registro del vehículo
-    $verifica = $conn->prepare("
-        SELECT tipo_registro 
-        FROM ingresosalida 
-        WHERE id_vehiculo = ? 
-        ORDER BY id_registro DESC 
-        LIMIT 1
-    ");
-    $verifica->bind_param("s", $placa);
-    $verifica->execute();
-    $resultado = $verifica->get_result();
+    // Buscar ID del vehículo
+    $buscarVehiculo = $conn->prepare("SELECT id_vehiculo FROM vehiculo WHERE placa = ?");
+    $buscarVehiculo->bind_param("s", $placa);
+    $buscarVehiculo->execute();
+    $vehiculoRes = $buscarVehiculo->get_result();
 
-    if ($resultado->num_rows > 0) {
-        $ultimo = $resultado->fetch_assoc();
+    if ($vehiculo = $vehiculoRes->fetch_assoc()) {
+        $id_vehiculo = $vehiculo['id_vehiculo'];
 
-        if ($ultimo['tipo_registro'] === 'Ingreso') {
-            // Insertar salida
-            $stmt = $conn->prepare("INSERT INTO ingresosalida 
-                (id_vehiculo, id_usuario, tipo_registro, fecha, hora, parqueadero, observaciones, sede, registrado_por, id_funcionario) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        // Verificar el último registro del vehículo
+        $verifica = $conn->prepare("
+            SELECT tipo_registro 
+            FROM ingresosalida 
+            WHERE id_vehiculo = ? 
+            ORDER BY id_registro DESC 
+            LIMIT 1
+        ");
+        $verifica->bind_param("i", $id_vehiculo);
+        $verifica->execute();
+        $resultado = $verifica->get_result();
 
-            $stmt->bind_param("sisssssssi", $placa, $registrado_por, $tipo_registro, $fecha, $hora, $parqueadero, $observaciones, $sede, $registrado_por, $id_funcionario);
+        if ($resultado->num_rows > 0) {
+            $ultimo = $resultado->fetch_assoc();
 
-            if ($stmt->execute()) {
-                $mensaje = "✅ Salida registrada correctamente.";
+            if ($ultimo['tipo_registro'] === 'Ingreso') {
+                // Insertar salida
+                $stmt = $conn->prepare("INSERT INTO ingresosalida 
+                    (id_vehiculo, id_usuario, tipo_registro, fecha, hora, parqueadero, observaciones, sede, registrado_por, id_funcionario) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+                $stmt->bind_param("iisssssssi", $id_vehiculo, $registrado_por, $tipo_registro, $fecha, $hora, $parqueadero, $observaciones, $sede, $registrado_por, $id_funcionario);
+
+                if ($stmt->execute()) {
+                    $mensaje = "✅ Salida registrada correctamente.";
+                } else {
+                    $mensaje = "❌ Error al registrar la salida: " . $stmt->error;
+                }
+
             } else {
-                $mensaje = "❌ Error al registrar la salida: " . $stmt->error;
+                $mensaje = "⚠️ El vehículo ya se encuentra fuera. No es posible registrar otra salida.";
             }
 
         } else {
-            $mensaje = "⚠️ El vehículo ya se encuentra fuera. No es posible registrar otra salida.";
+            $mensaje = "⚠️ No hay registro de ingreso previo para esta placa.";
         }
-
     } else {
-        $mensaje = "⚠️ No hay registro de ingreso previo para esta placa.";
+        $mensaje = "❌ La placa ingresada no se encuentra registrada.";
     }
 }
 ?>
